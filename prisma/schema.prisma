@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model klienci {
+  id_klienta  Int          @id @default(autoincrement())
+  imie        String       @db.VarChar(100)
+  nazwisko    String       @db.VarChar(100)
+  email       String       @db.VarChar(100)
+  adres       String       @db.VarChar(255)
+  nr_telefonu String       @db.VarChar(15)
+  zamowienia  zamowienia[]
+}
+
+model pozycje_zamowien {
+  id_pozycji_zamowienia Int        @id @default(autoincrement())
+  id_produktu           Int
+  id_zamowienia         Int
+  ilosc                 Int        @default(1)
+  produkty              produkty   @relation(fields: [id_produktu], references: [id_produktu], onDelete: NoAction, onUpdate: NoAction)
+  zamowienia            zamowienia @relation(fields: [id_zamowienia], references: [id_zamowienia], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model produkty {
+  id_produktu      Int                @id @default(autoincrement())
+  nazwa            String?            @db.VarChar(100)
+  opis             String?            @db.VarChar(500)
+  cena             Float
+  pozycje_zamowien pozycje_zamowien[]
+}
+
+model zamowienia {
+  id_zamowienia     Int                @id @default(autoincrement())
+  id_klienta        Int
+  data_zamowienia   DateTime           @db.Date
+  status_zamowienia String             @default("oczekuje na płatność") @db.VarChar(20)
+  pozycje_zamowien  pozycje_zamowien[]
+  klienci           klienci            @relation(fields: [id_klienta], references: [id_klienta], onDelete: Cascade, onUpdate: NoAction)
+}
